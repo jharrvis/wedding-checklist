@@ -1,0 +1,79 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@layer base {
+  body {
+    font-family: "Inter", sans-serif;
+  }
+
+  .font-dancing {
+    font-family: "Dancing Script", cursive;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-pink-600 text-white hover:bg-pink-700 focus:ring-pink-500;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md p-4 border border-gray-200;
+  }
+
+  .input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent;
+  }
+
+  .priority-urgent {
+    @apply bg-red-100 border-red-300 text-red-800;
+  }
+
+  .priority-high {
+    @apply bg-orange-100 border-orange-300 text-orange-800;
+  }
+
+  .priority-medium {
+    @apply bg-yellow-100 border-yellow-300 text-yellow-800;
+  }
+
+  .priority-low {
+    @apply bg-green-100 border-green-300 text-green-800;
+  }
+}
+
+/* Sortable.js styles */
+.sortable-ghost {
+  @apply opacity-50;
+}
+
+.sortable-chosen {
+  @apply transform scale-105;
+}
+
+.sortable-drag {
+  @apply shadow-lg;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .btn {
+    @apply text-sm px-3 py-2;
+  }
+
+  .card {
+    @apply p-3;
+  }
+}
