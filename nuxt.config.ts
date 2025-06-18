@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     configPath: "tailwind.config.js",
     exposeConfig: false,
     config: {},
-    injectPosition: 0,
+    // injectPosition: 0,
     viewer: true,
   },
 

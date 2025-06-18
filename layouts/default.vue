@@ -84,10 +84,14 @@ onMounted(() => {
 
   watch(
     () => authStore.user,
-    (user) => {
+    async (user) => {
       if (user) {
-        weddingStore.loadCategories();
-        weddingStore.loadTasks();
+        await weddingStore.loadCategories();
+        await weddingStore.loadTasks();
+        await weddingStore.loadWeddingDate();
+      } else {
+        // Cleanup when user logs out
+        weddingStore.cleanup();
       }
     },
     { immediate: true }

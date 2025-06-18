@@ -1,5 +1,16 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div
+    v-if="authStore.loading"
+    class="flex items-center justify-center min-h-screen"
+  >
+    <div class="text-center">
+      <div
+        class="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto"
+      ></div>
+      <p class="mt-4 text-gray-600">Loading...</p>
+    </div>
+  </div>
+  <div v-else class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header Section -->
     <div class="mb-8">
       <div
@@ -89,6 +100,7 @@ definePageMeta({
   middleware: "auth",
 });
 
+const authStore = useAuthStore();
 const weddingStore = useWeddingStore();
 const showAddTask = ref(false);
 const showAddCategory = ref(false);

@@ -10,6 +10,8 @@ import {
   onSnapshot,
   orderBy,
   Timestamp,
+  setDoc,
+  getDoc,
 } from "firebase/firestore";
 
 export interface Task {
@@ -40,6 +42,8 @@ export const useWeddingStore = defineStore("wedding", () => {
   const categories = ref<Category[]>([]);
   const weddingDate = ref<Date | null>(null);
   const viewMode = ref<"list" | "grid" | "calendar">("list");
+  const unsubscribeCategories = ref<any>(null);
+  const unsubscribeTasks = ref<any>(null);
 
   // Default categories
   const defaultCategories = [
@@ -97,11 +101,11 @@ export const useWeddingStore = defineStore("wedding", () => {
     },
   ];
 
-  const { $db } = useNuxtApp();
-  const authStore = useAuthStore();
-
   const initializeData = async () => {
+    const authStore = useAuthStore();
     if (!authStore.user) return;
+
+    const { $db } = useNuxtApp();
 
     // Initialize categories
     for (let i = 0; i < defaultCategories.length; i++) {
@@ -135,7 +139,15 @@ export const useWeddingStore = defineStore("wedding", () => {
   };
 
   const loadCategories = () => {
+    const authStore = useAuthStore();
     if (!authStore.user) return;
+
+    const { $db } = useNuxtApp();
+
+    // Unsubscribe previous listener
+    if (unsubscribeCategories.value) {
+      unsubscribeCategories.value();
+    }
 
     const q = query(
       collection($db, "categories"),
@@ -143,7 +155,7 @@ export const useWeddingStore = defineStore("wedding", () => {
       orderBy("order")
     );
 
-    onSnapshot(q, (snapshot) => {
+    unsubscribeCategories.value = onSnapshot(q, (snapshot) => {
       categories.value = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -153,7 +165,15 @@ export const useWeddingStore = defineStore("wedding", () => {
   };
 
   const loadTasks = () => {
+    const authStore = useAuthStore();
     if (!authStore.user) return;
+
+    const { $db } = useNuxtApp();
+
+    // Unsubscribe previous listener
+    if (unsubscribeTasks.value) {
+      unsubscribeTasks.value();
+    }
 
     const q = query(
       collection($db, "tasks"),
@@ -161,7 +181,7 @@ export const useWeddingStore = defineStore("wedding", () => {
       orderBy("order")
     );
 
-    onSnapshot(q, (snapshot) => {
+    unsubscribeTasks.value = onSnapshot(q, (snapshot) => {
       tasks.value = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -171,8 +191,24 @@ export const useWeddingStore = defineStore("wedding", () => {
     });
   };
 
-  const addCategory = async (name: string, color: string) => {
+  const loadWeddingDate = async () => {
+    const authStore = useAuthStore();
     if (!authStore.user) return;
+
+    const { $db } = useNuxtApp();
+    const docRef = doc($db, "users", authStore.user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists() && docSnap.data().weddingDate) {
+      weddingDate.value = docSnap.data().weddingDate.toDate();
+    }
+  };
+
+  const addCategory = async (name: string, color: string) => {
+    const authStore = useAuthStore();
+    if (!authStore.user) return;
+
+    const { $db } = useNuxtApp();
 
     await addDoc(collection($db, "categories"), {
       name,
@@ -184,7 +220,10 @@ export const useWeddingStore = defineStore("wedding", () => {
   };
 
   const addTask = async (taskData: Partial<Task>) => {
+    const authStore = useAuthStore();
     if (!authStore.user) return;
+
+    const { $db } = useNuxtApp();
 
     await addDoc(collection($db, "tasks"), {
       ...taskData,
@@ -197,10 +236,11 @@ export const useWeddingStore = defineStore("wedding", () => {
   };
 
   const updateTask = async (taskId: string, updates: Partial<Task>) => {
+    const { $db } = useNuxtApp();
     const taskRef = doc($db, "tasks", taskId);
-    const updateData = { ...updates };
+    const updateData: any = { ...updates };
 
-    if (updateData.dueDate) {
+    if (updateData.dueDate instanceof Date) {
       updateData.dueDate = Timestamp.fromDate(updateData.dueDate);
     }
 
@@ -208,6 +248,7 @@ export const useWeddingStore = defineStore("wedding", () => {
   };
 
   const deleteTask = async (taskId: string) => {
+    const { $db } = useNuxtApp();
     await deleteDoc(doc($db, "tasks", taskId));
   };
 
@@ -219,6 +260,25 @@ export const useWeddingStore = defineStore("wedding", () => {
     const updates: any = { order: newOrder };
     if (newCategory) updates.category = newCategory;
     await updateTask(taskId, updates);
+  };
+
+  const setWeddingDate = async (date: Date) => {
+    const authStore = useAuthStore();
+    if (!authStore.user) return;
+
+    const { $db } = useNuxtApp();
+
+    weddingDate.value = date;
+
+    // Save to Firestore
+    await setDoc(
+      doc($db, "users", authStore.user.uid),
+      {
+        weddingDate: Timestamp.fromDate(date),
+        updatedAt: Timestamp.now(),
+      },
+      { merge: true }
+    );
   };
 
   const urgentTasks = computed(() =>
@@ -249,8 +309,14 @@ export const useWeddingStore = defineStore("wedding", () => {
     return diffDays;
   });
 
-  const setWeddingDate = (date: Date) => {
-    weddingDate.value = date;
+  // Cleanup function
+  const cleanup = () => {
+    if (unsubscribeCategories.value) {
+      unsubscribeCategories.value();
+    }
+    if (unsubscribeTasks.value) {
+      unsubscribeTasks.value();
+    }
   };
 
   return {
@@ -265,11 +331,13 @@ export const useWeddingStore = defineStore("wedding", () => {
     initializeData,
     loadCategories,
     loadTasks,
+    loadWeddingDate,
     addCategory,
     addTask,
     updateTask,
     deleteTask,
     updateTaskOrder,
     setWeddingDate,
+    cleanup,
   };
 });
