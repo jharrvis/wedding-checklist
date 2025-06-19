@@ -57,6 +57,21 @@ export default defineNuxtConfig({
           content: "Rencanakan pernikahan impian Anda dengan mudah",
         },
       ],
+      script: [
+        {
+          innerHTML: `
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+              document.documentElement.classList.add('dark')
+            } else {
+              document.documentElement.classList.remove('dark')
+            }
+          `,
+          type: "text/javascript",
+        },
+      ],
+      __dangerouslyDisableSanitizersByTagID: {
+        "dark-mode-script": ["innerHTML"],
+      },
     },
   },
 });

@@ -297,6 +297,34 @@ export const useWeddingStore = defineStore("wedding", () => {
     await deleteDoc(doc($db, "tasks", taskId));
   };
 
+  const updateCategory = async (
+    categoryId: string,
+    updates: Partial<Category>
+  ) => {
+    const { $db } = useNuxtApp();
+    const categoryRef = doc($db, "categories", categoryId);
+
+    try {
+      await updateDoc(categoryRef, updates);
+      console.log("Category updated successfully");
+    } catch (error) {
+      console.error("Error updating category:", error);
+      throw error;
+    }
+  };
+
+  const deleteCategory = async (categoryId: string) => {
+    const { $db } = useNuxtApp();
+
+    try {
+      await deleteDoc(doc($db, "categories", categoryId));
+      console.log("Category deleted successfully");
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      throw error;
+    }
+  };
+
   const updateTaskOrder = async (
     taskId: string,
     newOrder: number,
@@ -381,6 +409,8 @@ export const useWeddingStore = defineStore("wedding", () => {
     addTask,
     updateTask,
     deleteTask,
+    updateCategory,
+    deleteCategory,
     updateTaskOrder,
     setWeddingDate,
     cleanup,

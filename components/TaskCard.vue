@@ -1,9 +1,28 @@
 <template>
   <div
-    class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-move"
+    class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
   >
     <div class="flex items-start justify-between">
       <div class="flex items-start space-x-3 flex-1">
+        <!-- Drag Handle -->
+        <div
+          class="drag-handle cursor-move pt-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 8h16M4 16h16"
+            />
+          </svg>
+        </div>
+
         <input
           type="checkbox"
           :checked="task.completed"
@@ -15,13 +34,18 @@
           <h4
             :class="[
               'text-sm font-medium',
-              task.completed ? 'line-through text-gray-500' : 'text-gray-900',
+              task.completed
+                ? 'line-through text-gray-500 dark:text-gray-400'
+                : 'text-gray-900 dark:text-white',
             ]"
           >
             {{ task.title }}
           </h4>
 
-          <p v-if="task.description" class="text-xs text-gray-600 mt-1">
+          <p
+            v-if="task.description"
+            class="text-xs text-gray-600 dark:text-gray-400 mt-1"
+          >
             {{ task.description }}
           </p>
 
@@ -37,7 +61,7 @@
 
             <span
               v-if="task.dueDate"
-              class="text-xs text-gray-500 flex items-center"
+              class="text-xs text-gray-500 dark:text-gray-400 flex items-center"
             >
               <CalendarIcon class="h-3 w-3 mr-1" />
               {{ formatDate(task.dueDate) }}
@@ -45,7 +69,7 @@
 
             <span
               v-if="task.location"
-              class="text-xs text-gray-500 flex items-center"
+              class="text-xs text-gray-500 dark:text-gray-400 flex items-center"
             >
               <MapPinIcon class="h-3 w-3 mr-1" />
               {{ task.location }}
@@ -57,14 +81,14 @@
       <div class="flex items-center space-x-2 ml-2">
         <button
           @click="showEdit = true"
-          class="text-gray-400 hover:text-gray-600 p-1"
+          class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 p-1"
         >
           <PencilIcon class="h-4 w-4" />
         </button>
 
         <button
           @click="confirmDelete"
-          class="text-gray-400 hover:text-red-600 p-1"
+          class="text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400 p-1"
         >
           <TrashIcon class="h-4 w-4" />
         </button>
@@ -127,3 +151,18 @@ const formatDate = (date) => {
   });
 };
 </script>
+
+<style scoped>
+.drag-handle {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.bg-white:hover .drag-handle {
+  opacity: 1;
+}
+
+.dark .bg-gray-800:hover .drag-handle {
+  opacity: 1;
+}
+</style>

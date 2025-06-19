@@ -10,47 +10,53 @@
   .font-dancing {
     font-family: "Dancing Script", cursive;
   }
+
+  /* Dark mode base styles */
+  .dark {
+    color-scheme: dark;
+  }
 }
 
 @layer components {
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 transform active:scale-95;
   }
 
   .btn-primary {
-    @apply bg-pink-600 text-white hover:bg-pink-700 focus:ring-pink-500;
+    @apply bg-pink-600 text-white hover:bg-pink-700 focus:ring-pink-500 dark:bg-pink-500 dark:hover:bg-pink-600;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500;
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600;
   }
 
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 dark:bg-red-500 dark:hover:bg-red-600;
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-md p-4 border border-gray-200;
+    @apply bg-white rounded-lg shadow-md p-4 border border-gray-200 dark:bg-gray-800 dark:border-gray-700;
   }
 
   .input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent;
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400;
   }
 
+  /* Priority styles with dark mode support */
   .priority-urgent {
-    @apply bg-red-100 border-red-300 text-red-800;
+    @apply bg-red-100 border-red-300 text-red-800 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300;
   }
 
   .priority-high {
-    @apply bg-orange-100 border-orange-300 text-orange-800;
+    @apply bg-orange-100 border-orange-300 text-orange-800 dark:bg-orange-900/30 dark:border-orange-700 dark:text-orange-300;
   }
 
   .priority-medium {
-    @apply bg-yellow-100 border-yellow-300 text-yellow-800;
+    @apply bg-yellow-100 border-yellow-300 text-yellow-800 dark:bg-yellow-900/30 dark:border-yellow-700 dark:text-yellow-300;
   }
 
   .priority-low {
-    @apply bg-green-100 border-green-300 text-green-800;
+    @apply bg-green-100 border-green-300 text-green-800 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300;
   }
 }
 
@@ -60,20 +66,81 @@
 }
 
 .sortable-chosen {
-  @apply transform scale-105;
+  @apply transform scale-105 shadow-lg;
 }
 
 .sortable-drag {
-  @apply shadow-lg;
+  @apply shadow-2xl rotate-2;
 }
 
-/* Mobile optimizations */
+/* Mobile touch optimization */
 @media (max-width: 640px) {
   .btn {
-    @apply text-sm px-3 py-2;
+    @apply text-sm px-3 py-2 min-h-[44px] min-w-[44px];
   }
 
   .card {
-    @apply p-3;
+    @apply p-3 shadow-sm;
+  }
+
+  .input {
+    @apply text-base; /* Prevents zoom on iOS */
+  }
+
+  /* Larger touch targets */
+  button,
+  a,
+  input[type="checkbox"] {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Better spacing for mobile */
+  .space-y-3 > * + * {
+    @apply mt-2;
+  }
+}
+
+/* Smooth transitions for dark mode */
+* {
+  @apply transition-colors duration-200;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded-full dark:bg-gray-600;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500 dark:bg-gray-500;
+}
+
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive grid for mobile */
+@media (max-width: 640px) {
+  .grid-cols-2 {
+    @apply grid-cols-1;
+  }
+
+  .sm\:grid-cols-4 {
+    @apply grid-cols-2;
   }
 }
