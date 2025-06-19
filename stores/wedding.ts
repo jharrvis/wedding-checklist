@@ -149,19 +149,33 @@ export const useWeddingStore = defineStore("wedding", () => {
       unsubscribeCategories.value();
     }
 
+    // Temporary: Remove orderBy until index is created
     const q = query(
       collection($db, "categories"),
-      where("userId", "==", authStore.user.uid),
-      orderBy("order")
+      where("userId", "==", authStore.user.uid)
     );
 
-    unsubscribeCategories.value = onSnapshot(q, (snapshot) => {
-      categories.value = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate(),
-      })) as Category[];
-    });
+    unsubscribeCategories.value = onSnapshot(
+      q,
+      (snapshot) => {
+        categories.value = snapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              name: data.name,
+              color: data.color,
+              userId: data.userId,
+              order: data.order,
+              createdAt: data.createdAt?.toDate(),
+            } as Category;
+          })
+          .sort((a, b) => a.order - b.order); // Sort in memory instead
+      },
+      (error) => {
+        console.error("Error loading categories:", error);
+      }
+    );
   };
 
   const loadTasks = () => {
@@ -175,20 +189,39 @@ export const useWeddingStore = defineStore("wedding", () => {
       unsubscribeTasks.value();
     }
 
+    // Temporary: Remove orderBy until index is created
     const q = query(
       collection($db, "tasks"),
-      where("userId", "==", authStore.user.uid),
-      orderBy("order")
+      where("userId", "==", authStore.user.uid)
     );
 
-    unsubscribeTasks.value = onSnapshot(q, (snapshot) => {
-      tasks.value = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        dueDate: doc.data().dueDate?.toDate() || null,
-        createdAt: doc.data().createdAt?.toDate(),
-      })) as Task[];
-    });
+    unsubscribeTasks.value = onSnapshot(
+      q,
+      (snapshot) => {
+        tasks.value = snapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              title: data.title,
+              description: data.description,
+              category: data.category,
+              priority: data.priority,
+              dueDate: data.dueDate?.toDate() || null,
+              location: data.location,
+              notes: data.notes,
+              completed: data.completed,
+              order: data.order,
+              userId: data.userId,
+              createdAt: data.createdAt?.toDate(),
+            } as Task;
+          })
+          .sort((a, b) => a.order - b.order); // Sort in memory instead
+      },
+      (error) => {
+        console.error("Error loading tasks:", error);
+      }
+    );
   };
 
   const loadWeddingDate = async () => {
@@ -210,13 +243,19 @@ export const useWeddingStore = defineStore("wedding", () => {
 
     const { $db } = useNuxtApp();
 
-    await addDoc(collection($db, "categories"), {
-      name,
-      color,
-      userId: authStore.user.uid,
-      order: categories.value.length,
-      createdAt: Timestamp.now(),
-    });
+    try {
+      await addDoc(collection($db, "categories"), {
+        name,
+        color,
+        userId: authStore.user.uid,
+        order: categories.value.length,
+        createdAt: Timestamp.now(),
+      });
+      console.log("Category added successfully");
+    } catch (error) {
+      console.error("Error adding category:", error);
+      throw error;
+    }
   };
 
   const addTask = async (taskData: Partial<Task>) => {
@@ -225,14 +264,20 @@ export const useWeddingStore = defineStore("wedding", () => {
 
     const { $db } = useNuxtApp();
 
-    await addDoc(collection($db, "tasks"), {
-      ...taskData,
-      userId: authStore.user.uid,
-      order: tasks.value.length,
-      completed: false,
-      dueDate: taskData.dueDate ? Timestamp.fromDate(taskData.dueDate) : null,
-      createdAt: Timestamp.now(),
-    });
+    try {
+      await addDoc(collection($db, "tasks"), {
+        ...taskData,
+        userId: authStore.user.uid,
+        order: tasks.value.length,
+        completed: false,
+        dueDate: taskData.dueDate ? Timestamp.fromDate(taskData.dueDate) : null,
+        createdAt: Timestamp.now(),
+      });
+      console.log("Task added successfully");
+    } catch (error) {
+      console.error("Error adding task:", error);
+      throw error;
+    }
   };
 
   const updateTask = async (taskId: string, updates: Partial<Task>) => {
@@ -320,8 +365,8 @@ export const useWeddingStore = defineStore("wedding", () => {
   };
 
   return {
-    tasks: readonly(tasks),
-    categories: readonly(categories),
+    tasks: tasks,
+    categories: categories,
     weddingDate,
     viewMode,
     urgentTasks,
